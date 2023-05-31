@@ -1,0 +1,8 @@
+FROM caddy:2.6.4-alpine
+
+VOLUME /data
+VOLUME /config
+
+ENV SITE_ADDRESS=
+
+COPY ./Caddyfile /etc/caddy/Caddyfile

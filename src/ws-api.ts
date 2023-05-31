@@ -1,18 +1,22 @@
-import type { Dwn } from '@tbd54566975/dwn-sdk-js';
-import type { RequestContext } from './lib/json-rpc-router.js';
+import type { Dwn } from "@tbd54566975/dwn-sdk-js";
+import type { RequestContext } from "./lib/json-rpc-router.js";
 
-import { Server } from 'http';
+import { Server } from "http";
 
-import { WebSocket } from 'ws';
-import { v4 as uuidv4 } from 'uuid';
-import { WebSocketServer } from 'ws';
-import { DataStream } from '@tbd54566975/dwn-sdk-js';
-import { base64url } from 'multiformats/bases/base64';
+import { WebSocket } from "ws";
+import { v4 as uuidv4 } from "uuid";
+import { WebSocketServer } from "ws";
+import { DataStream } from "@tbd54566975/dwn-sdk-js";
+import { base64url } from "multiformats/bases/base64";
 
-import { jsonRpcApi } from './json-rpc-api.js';
-import { createJsonRpcErrorResponse, JsonRpcErrorCodes, JsonRpcResponse } from './lib/json-rpc.js';
+import { jsonRpcApi } from "./json-rpc-api.js";
+import {
+  createJsonRpcErrorResponse,
+  JsonRpcErrorCodes,
+  JsonRpcResponse,
+} from "./lib/json-rpc.js";
 
-const SOCKET_ISALIVE_SYMBOL = Symbol('isAlive');
+const SOCKET_ISALIVE_SYMBOL = Symbol("isAlive");
 
 export class WsApi {
   wsServer: WebSocketServer;
@@ -29,61 +33,81 @@ export class WsApi {
 
   listen() {
     const dwn = this.dwn;
-    this.wsServer.on('connection', function (socket: WebSocket, _request, _client) {
-      socket[SOCKET_ISALIVE_SYMBOL] = true;
+    this.wsServer.on(
+      "connection",
+      function (socket: WebSocket, _request, _client) {
+        socket[SOCKET_ISALIVE_SYMBOL] = true;
 
-      // Pong messages are automatically sent in response to ping messages as required by
-      // the websocket spec. So, no need to send explicit pongs from browser
-      socket.on('pong', function() {
-        this[SOCKET_ISALIVE_SYMBOL] = true;
-      });
+        // Pong messages are automatically sent in response to ping messages as required by
+        // the websocket spec. So, no need to send explicit pongs from browser
+        socket.on("pong", function () {
+          this[SOCKET_ISALIVE_SYMBOL] = true;
+        });
 
-      socket.on('close', function () {
-        // Clean up event listeners
-        socket.removeAllListeners();
-      });
+        socket.on("close", function () {
+          // Clean up event listeners
+          socket.removeAllListeners();
+        });
 
-      socket.on('error', function (error) {
-        console.error('WebSocket error:', error);
-        // Close the socket and remove all event listeners
-        socket.terminate();
-        socket.removeAllListeners();
-      });
+        socket.on("error", function (error) {
+          console.error("WebSocket error:", error);
+          // Close the socket and remove all event listeners
+          socket.terminate();
+          socket.removeAllListeners();
+        });
 
-      socket.on('message', async function(dataBuffer) {
-        let dwnRequest;
+        socket.on("message", async function (dataBuffer) {
+          let dwnRequest;
 
-        try {
-          // deserialize bytes into JSON object
-          dwnRequest = dataBuffer.toString();
-          if (!dwnRequest) {
-            const jsonRpcResponse = createJsonRpcErrorResponse(uuidv4(),
-              JsonRpcErrorCodes.BadRequest, 'request payload required.');
+          try {
+            // deserialize bytes into JSON object
+            dwnRequest = dataBuffer.toString();
+            if (!dwnRequest) {
+              const jsonRpcResponse = createJsonRpcErrorResponse(
+                uuidv4(),
+                JsonRpcErrorCodes.BadRequest,
+                "request payload required."
+              );
 
-            const responseBuffer = WsApi.jsonRpcResponseToBuffer(jsonRpcResponse);
+              const responseBuffer =
+                WsApi.jsonRpcResponseToBuffer(jsonRpcResponse);
+              return socket.send(responseBuffer);
+            }
+
+            dwnRequest = JSON.parse(dwnRequest);
+          } catch (e) {
+            const jsonRpcResponse = createJsonRpcErrorResponse(
+              uuidv4(),
+              JsonRpcErrorCodes.BadRequest,
+              e.message
+            );
+
+            const responseBuffer =
+              WsApi.jsonRpcResponseToBuffer(jsonRpcResponse);
             return socket.send(responseBuffer);
           }
 
-          dwnRequest = JSON.parse(dwnRequest);
-        } catch (e) {
-          const jsonRpcResponse = createJsonRpcErrorResponse(
-            uuidv4(), JsonRpcErrorCodes.BadRequest, e.message);
+          // Check whether data was provided in the request
+          const { encodedData } = dwnRequest.params;
+          const requestDataStream = encodedData
+            ? DataStream.fromBytes(base64url.baseDecode(encodedData))
+            : undefined;
+
+          const requestContext: RequestContext = {
+            dwn,
+            transport: "ws",
+            dataStream: requestDataStream,
+          };
+          const { jsonRpcResponse } = await jsonRpcApi.handle(
+            dwnRequest,
+            requestContext
+          );
 
           const responseBuffer = WsApi.jsonRpcResponseToBuffer(jsonRpcResponse);
           return socket.send(responseBuffer);
-        }
-
-        // Check whether data was provided in the request
-        const { encodedData } = dwnRequest.params;
-        const requestDataStream = encodedData ? DataStream.fromBytes(base64url.baseDecode(encodedData)) : undefined;
-
-        const requestContext: RequestContext = { dwn, transport: 'ws', dataStream: requestDataStream };
-        const { jsonRpcResponse } = await jsonRpcApi.handle(dwnRequest, requestContext);
-
-        const responseBuffer = WsApi.jsonRpcResponseToBuffer(jsonRpcResponse);
-        return socket.send(responseBuffer);
-      });
-    });
+        });
+      }
+    );
 
     // Sometimes connections between client <-> server can get borked in such a way that
     // leaves both unaware of the borkage. ping messages can be used as a means to verify
@@ -101,7 +125,7 @@ export class WsApi {
       });
     }, 30_000);
 
-    this.wsServer.on('close', function close() {
+    this.wsServer.on("close", function close() {
       clearInterval(heartbeatInterval);
     });
   }

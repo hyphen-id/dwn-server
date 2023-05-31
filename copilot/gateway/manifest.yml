@@ -1,0 +1,60 @@
+name: gateway
+type: Load Balanced Web Service
+
+http:
+  path: '/'
+  alias: 'dwn.hyphen-cloud.xyz'
+  healthcheck:
+    path: /health
+    healthy_threshold: 3
+    unhealthy_threshold: 5
+    interval: 10s
+    timeout: 5s
+
+image:
+  build:
+    dockerfile: ./Dockerfile.prod
+    context: ../../
+  port: 3000
+
+storage:
+  volumes:
+    dwn-storage:
+      efs: true
+      path: '/app/apps/dwn-server/data'
+      read_only: false
+
+cpu: 256       # Number of CPU units for the task.
+memory: 512    # Amount of memory in MiB used by the task.
+platform: linux/x86_64  # See https://aws.github.io/copilot-cli/docs/manifest/lb-web-service/#platform
+count: 1       # Number of tasks that should be running in your service.
+exec: true     # Enable running commands in your container.
+network:
+  connect: true # Enable Service Connect for intra-environment traffic between services.
+
+# Connect your App Runner service to your environment's VPC.
+# network:
+#   vpc:
+#     placement: private
+
+
+# Enable tracing for the service.
+# observability:
+#   tracing: awsxray
+
+# Optional fields for more advanced use-cases.
+#
+# variables:                    # Pass environment variables as key value pairs.
+#   LOG_LEVEL: info
+#
+# tags:                         # Pass tags as key value pairs.
+#   project: project-name
+#
+# secrets:                      # Pass secrets from AWS Systems Manager (SSM) Parameter Store and Secrets Manager.
+#   GITHUB_TOKEN: GITHUB_TOKEN  # The key is the name of the environment variable, the value is the name of an SSM parameter.
+
+# You can override any of the values defined above by environment.
+# environments:
+#   test:
+#     variables:
+#       LOG_LEVEL: debug        # Log level for the "test" environment.

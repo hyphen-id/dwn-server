@@ -1,6 +1,6 @@
 export type JsonRpcId = string | number | null;
 export type JsonRpcParams = any;
-export type JsonRpcVersion = '2.0';
+export type JsonRpcVersion = "2.0";
 
 export interface JsonRpcRequest {
   jsonrpc: JsonRpcVersion;
@@ -49,14 +49,14 @@ export const createJsonRpcErrorResponse = (
   id: JsonRpcId,
   code: JsonRpcErrorCodes,
   message: string,
-  data?: any,
+  data?: any
 ): JsonRpcErrorResponse => {
   const error: JsonRpcError = { code, message };
   if (data != undefined) {
     error.data = data;
   }
   return {
-    jsonrpc: '2.0',
+    jsonrpc: "2.0",
     id,
     error,
   };
@@ -64,10 +64,10 @@ export const createJsonRpcErrorResponse = (
 
 export const createJsonRpcNotification = (
   method: string,
-  params?: JsonRpcParams,
+  params?: JsonRpcParams
 ): JsonRpcRequest => {
   return {
-    jsonrpc: '2.0',
+    jsonrpc: "2.0",
     method,
     params,
   };
@@ -76,10 +76,10 @@ export const createJsonRpcNotification = (
 export const createJsonRpcRequest = (
   id: JsonRpcId,
   method: string,
-  params?: JsonRpcParams,
+  params?: JsonRpcParams
 ): JsonRpcRequest => {
   return {
-    jsonrpc: '2.0',
+    jsonrpc: "2.0",
     id,
     method,
     params,
@@ -88,12 +88,12 @@ export const createJsonRpcRequest = (
 
 export const createJsonRpcSuccessResponse = (
   id: JsonRpcId,
-  result?: any,
+  result?: any
 ): JsonRpcSuccessResponse => {
   return {
-    jsonrpc : '2.0',
+    jsonrpc: "2.0",
     id,
-    result  : result ?? null,
+    result: result ?? null,
   };
 };
 

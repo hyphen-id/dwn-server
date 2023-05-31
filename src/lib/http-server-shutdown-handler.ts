@@ -1,7 +1,7 @@
-import { Server } from 'http';
-import { Socket } from 'net';
+import { Server } from "http";
+import { Socket } from "net";
 
-const SOCKET_IDLE_SYMBOL = Symbol('idle');
+const SOCKET_IDLE_SYMBOL = Symbol("idle");
 
 export class HttpServerShutdownHandler {
   private tcpSockets: { [socketId: number]: Socket };
@@ -16,8 +16,7 @@ export class HttpServerShutdownHandler {
     this.stopping = false;
 
     // This event is emitted when a new TCP stream is established
-    this.server.on('connection', socket => {
-
+    this.server.on("connection", (socket) => {
       // set socket to idle. this same socket will be accessible within the `http.on('request', (req, res))` event listener
       // as `request.connection`
       socket[SOCKET_IDLE_SYMBOL] = true;
@@ -25,14 +24,14 @@ export class HttpServerShutdownHandler {
       this.tcpSockets[tcpSocketId] = socket;
 
       // This event is emitted when a tcp stream is `destroy`ed
-      socket.on('close', () => {
+      socket.on("close", () => {
         delete this.tcpSockets[tcpSocketId];
       });
     });
 
     // Emitted each time there is a request. There may be multiple requests
     // per connection (in the case of HTTP Keep-Alive connections).
-    this.server.on('request', (request, response) => {
+    this.server.on("request", (request, response) => {
       const { socket } = request;
 
       // set __idle to false because this socket is being used for an incoming request
@@ -42,8 +41,7 @@ export class HttpServerShutdownHandler {
       // when the last segment of the response headers and body have been handed off to the
       // operating system for transmission over the network.
       // It does not imply that the client has received anything yet.
-      response.on('finish', () => {
-
+      response.on("finish", () => {
         // set __idle back to true because the socket has finished facilitating a request. This socket may be used again without being
         // destroyed if keep-alive is being leveraged
         socket[SOCKET_IDLE_SYMBOL] = true;

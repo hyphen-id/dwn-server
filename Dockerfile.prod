@@ -1,0 +1,35 @@
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN apk add --no-cache libc6-compat && \
+  apk update
+
+RUN yarn dlx turbo prune --scope=dwn-server --docker
+RUN cp -R .yarn .yarnrc.yml out/full
+
+FROM node:18-alpine AS installer
+WORKDIR /app
+RUN apk add --no-cache libc6-compat git make clang build-base python3 && \
+  apk update
+
+COPY --from=builder /app/out/yarn.lock ./yarn.lock
+COPY --from=builder /app/out/full/ .
+
+RUN yarn install
+RUN cp apps/dwn-server/.env.example apps/dwn-server/.env
+RUN yarn dlx turbo run build --filter=dwn-server
+RUN yarn workspaces focus --all --production
+
+
+FROM node:18-alpine
+WORKDIR /app
+# RUN addgroup --system --gid 1001 app
+# RUN adduser --system --uid 1001 app
+# USER app
+COPY --from=installer /app .
+WORKDIR /app/apps/dwn-server
+VOLUME /app/apps/dwn-server/data
+EXPOSE 3000
+CMD [ "yarn", "start:prod" ]
+
+
