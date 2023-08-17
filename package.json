@@ -43,6 +43,7 @@
     "start:prod": "node dist/src/main.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.ts\" --fix",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "clean": "rm -rf data dist node_modules .turbo"
   }
 }

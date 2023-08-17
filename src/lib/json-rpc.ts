@@ -1,18 +1,18 @@
-export type JsonRpcId = string | number | null;
-export type JsonRpcParams = any;
-export type JsonRpcVersion = "2.0";
+export type JsonRpcId = string | number | null
+export type JsonRpcParams = any
+export type JsonRpcVersion = '2.0'
 
 export interface JsonRpcRequest {
-  jsonrpc: JsonRpcVersion;
-  id?: JsonRpcId;
-  method: string;
-  params?: JsonRpcParams;
+  jsonrpc: JsonRpcVersion
+  id?: JsonRpcId
+  method: string
+  params?: JsonRpcParams
 }
 
 export interface JsonRpcError {
-  code: JsonRpcErrorCodes;
-  message: string;
-  data?: any;
+  code: JsonRpcErrorCodes
+  message: string
+  data?: any
 }
 
 export enum JsonRpcErrorCodes {
@@ -29,20 +29,20 @@ export enum JsonRpcErrorCodes {
   Forbidden = -50403, // equivalent to HTTP Status 403
 }
 
-export type JsonRpcResponse = JsonRpcSuccessResponse | JsonRpcErrorResponse;
+export type JsonRpcResponse = JsonRpcSuccessResponse | JsonRpcErrorResponse
 
 export interface JsonRpcSuccessResponse {
-  jsonrpc: JsonRpcVersion;
-  id: JsonRpcId;
-  result: any;
-  error?: undefined;
+  jsonrpc: JsonRpcVersion
+  id: JsonRpcId
+  result: any
+  error?: undefined
 }
 
 export interface JsonRpcErrorResponse {
-  jsonrpc: JsonRpcVersion;
-  id: JsonRpcId;
-  result?: never;
-  error: JsonRpcError;
+  jsonrpc: JsonRpcVersion
+  id: JsonRpcId
+  result?: never
+  error: JsonRpcError
 }
 
 export const createJsonRpcErrorResponse = (
@@ -56,44 +56,34 @@ export const createJsonRpcErrorResponse = (
     error.data = data;
   }
   return {
-    jsonrpc: "2.0",
+    jsonrpc: '2.0',
     id,
     error,
   };
 };
 
-export const createJsonRpcNotification = (
-  method: string,
-  params?: JsonRpcParams
-): JsonRpcRequest => {
+export const createJsonRpcNotification = (method: string, params?: JsonRpcParams): JsonRpcRequest => {
   return {
-    jsonrpc: "2.0",
+    jsonrpc: '2.0',
     method,
     params,
   };
 };
 
-export const createJsonRpcRequest = (
-  id: JsonRpcId,
-  method: string,
-  params?: JsonRpcParams
-): JsonRpcRequest => {
+export const createJsonRpcRequest = (id: JsonRpcId, method: string, params?: JsonRpcParams): JsonRpcRequest => {
   return {
-    jsonrpc: "2.0",
+    jsonrpc: '2.0',
     id,
     method,
     params,
   };
 };
 
-export const createJsonRpcSuccessResponse = (
-  id: JsonRpcId,
-  result?: any
-): JsonRpcSuccessResponse => {
+export const createJsonRpcSuccessResponse = (id: JsonRpcId, result?: any): JsonRpcSuccessResponse => {
   return {
-    jsonrpc: "2.0",
+    jsonrpc : '2.0',
     id,
-    result: result ?? null,
+    result  : result ?? null,
   };
 };
 
