@@ -1,46 +1,41 @@
 module.exports = {
-  extends       : ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:mocha/recommended'],
-  parser        : '@typescript-eslint/parser',
-  parserOptions : {
-    ecmaVersion : 2022,
-    sourceType  : 'module'
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    ecmaVersion: 'latest', // Allows the use of modern ECMAScript features
+    sourceType: 'module', // Allows for the use of imports
   },
-  plugins : ['@typescript-eslint', 'mocha'],
-  env     : {
-    node   : true,
-    es2022 : true
+  plugins: [
+    '@typescript-eslint',
+    'prettier',
+    'todo-plz', // for enforcing TODO formatting to require "github.com/TBD54566975/dwn-server/issues/"
+  ],
+  env: {
+    node: true, // Enable Node.js global variables
+    browser: true,
   },
   rules: {
-    'key-spacing': [
+    'prettier/prettier': 'error',
+    curly: ['error', 'all'],
+    'no-console': 'off',
+    '@typescript-eslint/explicit-function-return-type': ['error'],
+    // enforce `import type` when an import is not used at runtime, allowing transpilers/bundlers to drop imports as an optimization
+    '@typescript-eslint/consistent-type-imports': 'error',
+    '@typescript-eslint/no-unused-vars': [
       'error',
       {
-        'align': {
-          'afterColon'  : true,
-          'beforeColon' : true,
-          'on'          : 'colon'
-        }
-      }
+        vars: 'all',
+        args: 'after-used',
+        ignoreRestSiblings: true,
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+      },
     ],
-    'quotes': [
+    'prefer-const': ['error', { destructuring: 'all' }],
+    // enforce github issue reference for every TO-DO comment
+    'todo-plz/ticket-ref': [
       'error',
-      'single',
-      { 'allowTemplateLiterals': true }
+      { commentPattern: '.*github.com/TBD54566975/dwn-server/issues/.*' },
     ],
-    'semi'                              : ['error', 'always'],
-    'indent'                            : ['error', 2],
-    'no-unused-vars'                    : 'off',
-    'prefer-const'                      : 'off',
-    '@typescript-eslint/no-unused-vars' : [
-      'error',
-      {
-        'vars'               : 'all',
-        'args'               : 'after-used',
-        'ignoreRestSiblings' : true,
-        'argsIgnorePattern'  : '^_',
-        'varsIgnorePattern'  : '^_'
-      }
-    ],
-    '@typescript-eslint/no-explicit-any' : 'off',
-    'no-trailing-spaces'                 : ['error'],
-  }
+  },
+  extends: ['prettier'],
 };

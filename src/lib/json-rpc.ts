@@ -81,9 +81,9 @@ export const createJsonRpcRequest = (id: JsonRpcId, method: string, params?: Jso
 
 export const createJsonRpcSuccessResponse = (id: JsonRpcId, result?: any): JsonRpcSuccessResponse => {
   return {
-    jsonrpc : '2.0',
+    jsonrpc: '2.0',
     id,
-    result  : result ?? null,
+    result: result ?? null,
   };
 };
 

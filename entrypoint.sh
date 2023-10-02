@@ -1,3 +1,3 @@
 #! /bin/bash
-
-exec node /app/apps/dwn-server/dist/src/main.js
+cd /app/apps/dwn-server
+exec node /app/apps/dwn-server/dist/esm/src/main.js
