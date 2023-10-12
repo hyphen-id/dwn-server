@@ -78,7 +78,7 @@
     "lint:fix": "eslint . --ext .ts --fix",
     "prettier:fix": "prettier . --write  --ignore-unknown",
     "test": "npm run build:esm && cp -R tests/fixtures dist/esm/tests && mocha dist/esm/tests/*.spec.js",
-    "server": "npm run build:esm && node dist/esm/src/main.js",
+    "server": "npm run build:esm && node --env-file=.env dist/esm/src/main.js",
     "prepare": "husky install"
   },
   "husky": {

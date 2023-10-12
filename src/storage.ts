@@ -132,6 +132,7 @@ function getDBFromURI(u: URL): Dialect {
       });
     case BackendTypes.POSTGRES:
       return new PostgresDialect({
+        // @ts-ignore
         pool: async () => new pg.Pool({ u }),
         cursor: Cursor,
       });
